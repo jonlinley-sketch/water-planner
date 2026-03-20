@@ -22,28 +22,23 @@
         }
         *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
         body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg3);color:var(--text);min-height:100vh;padding-bottom:50px;}
-        
         .app-header{background:var(--bg);border-bottom:1px solid var(--border);padding:12px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100;}
         .app-title{font-size:16px;font-weight:700;}
         .app-sub{font-size:11px;color:var(--text2);}
-        
         .header-actions{margin-left:auto;display:flex;gap:8px;}
         .hdr-btn{padding:8px 16px;font-size:12px;font-weight:600;border-radius:20px;border:none;cursor:pointer;}
         .hdr-save{background:var(--accent);color:#fff;}
         .hdr-reset{background:var(--bg2);color:var(--text2);border:1px solid var(--border2);}
-
         .tabs{display:grid;grid-template-columns:repeat(3,1fr);background:var(--bg);border-bottom:1px solid var(--border);position:sticky;top:58px;z-index:90;}
         .tab{padding:12px;font-size:13px;border:none;background:none;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;}
         .tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:700;}
-
         .panel{display:none;padding:15px;max-width:600px;margin:0 auto;}
         .panel.active{display:block;}
-
         .card{background:var(--bg);border-radius:var(--radius);padding:15px;margin-bottom:12px;border:1px solid var(--border);}
         .scout-row{display:flex;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);gap:12px;}
         .scout-row:last-child{border-bottom:none;}
-        
         input[type="checkbox"]{width:22px;height:22px;accent-color:var(--accent);}
+        input[type="number"]{width:60px;padding:5px;border:1px solid var(--border2);border-radius:4px;}
         .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 20px;border-radius:20px;display:none;z-index:1000;}
     </style>
 </head>
@@ -61,16 +56,97 @@
 </div>
 
 <div class="tabs">
-    <button class="tab active" onclick="showTab('attendance')">Attendance</button>
-    <button class="tab" onclick="showTab('allocation')">Allocation</button>
-    <button class="tab" onclick="showTab('adults')">Adults</button>
+    <button class="tab active" id="tab-attendance" onclick="showTab('attendance')">Attendance</button>
+    <button class="tab" id="tab-allocation" onclick="showTab('allocation')">Allocation</button>
+    <button class="tab" id="tab-adults" onclick="showTab('adults')">Adults</button>
 </div>
 
-<div id="attendance" class="panel active">
-    <div id="patrolList"></div>
-</div>
+<div id="attendance" class="panel active"><div id="patrolList"></div></div>
+<div id="allocation" class="panel"><div class="card"><h3>Boat Allocation</h3><div id="allocList" style="margin-top:15px;"></div></div></div>
+<div id="adults" class="panel"><div id="leaderList"></div><button class="hdr-btn hdr-reset" style="width:100%; margin-top:10px;" onclick="addLeader()">+ Add Leader</button></div>
 
-<div id="allocation" class="panel">
-    <div class="card">
-        <h3>Boat Allocation</h3>
-        <p style
+<div class="toast" id="toast">Synced!</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDnrrhSFsbzPUqtm4d_rHxz7-goQ_PMsQI",
+        authDomain: "scout-water-planner-2026.firebaseapp.com",
+        projectId: "scout-water-planner-2026",
+        storageBucket: "scout-water-planner-2026.appspot.com",
+        messagingSenderId: "1062325372337",
+        appId: "1:1062325372337:web:86a117b9b168925208f060"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const docRef = doc(db, "sessions", "live_data");
+
+    // "Safe" Defaults so the screen isn't blank while loading
+    let state = {
+        scouts: { "Eagles": ["Alex", "Sam"], "Cobras": ["Ben", "Leo"] },
+        attendance: {},
+        alloc: { "Kayaks": 0, "Canoes": 0, "SIT-ONs": 0 },
+        leaders: ["Lead Instructor"]
+    };
+
+    window.showTab = (id) => {
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.getElementById('tab-' + id).classList.add('active');
+    };
+
+    function render() {
+        // Attendance
+        let h = '';
+        for (let p in state.scouts) {
+            h += `<div class="card"><strong>${p}</strong>`;
+            state.scouts[p].forEach(s => {
+                const checked = state.attendance[s] ? 'checked' : '';
+                h += `<div class="scout-row"><input type="checkbox" ${checked} onchange="toggleScout('${s}')"><span>${s}</span></div>`;
+            });
+            h += `</div>`;
+        }
+        document.getElementById('patrolList').innerHTML = h || 'No patrols found.';
+
+        // Allocation
+        let ah = '';
+        for (let b in state.alloc) {
+            ah += `<div class="scout-row"><span style="flex:1">${b}</span><input type="number" value="${state.alloc[b]}" onchange="updateAlloc('${b}', this.value)"></div>`;
+        }
+        document.getElementById('allocList').innerHTML = ah;
+
+        // Leaders
+        document.getElementById('leaderList').innerHTML = state.leaders.map(l => `<div class="card">${l}</div>`).join('');
+    }
+
+    window.toggleScout = (name) => { state.attendance[name] = !state.attendance[name]; };
+    window.updateAlloc = (boat, val) => { state.alloc[boat] = parseInt(val) || 0; };
+    window.addLeader = () => { const n = prompt("Leader Name:"); if(n) { state.leaders.push(n); render(); } };
+    window.resetData = () => { if(confirm("Reset everything?")) { state.attendance = {}; state.alloc = { "Kayaks": 0, "Canoes": 0, "SIT-ONs": 0 }; save(); } };
+
+    async function save() {
+        try {
+            await setDoc(docRef, state);
+            const t = document.getElementById('toast');
+            t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 2000);
+        } catch (e) { alert("Sync Error: Check Firebase Rules date."); }
+    }
+
+    document.getElementById('syncBtn').onclick = save;
+
+    onSnapshot(docRef, (snap) => {
+        if (snap.exists()) {
+            state = snap.data();
+            render();
+        }
+    });
+
+    render();
+</script>
+</body>
+</html>
