@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Scout Boats">
+<title>Scout Water Session Planner</title>
+<style>
+:root {
+  --bg:#ffffff; --bg2:#f5f5f3; --bg3:#eeede8;
+  --text:#1a1a18; --text2:#6b6b67; --text3:#9b9b96;
+  --border:rgba(0,0,0,0.12); --border2:rgba(0,0,0,0.2);
+  --radius:10px; --radius-sm:7px;
+  --success-bg:#eaf3de; --success:#27500a;
+  --danger-bg:#fcebeb;  --danger:#a32d2d;
+  --accent:#0f6e56;
+}
+@media (prefers-color-scheme:dark) {
+  :root {
+    --bg:#1c1c1a; --bg2:#252523; --bg3:#2e2e2b;
+    --text:#f0efe9; --text2:#a0a09a; --text3:#6a6a65;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.18);
+    --success-bg:#173404; --success:#c0dd97;
+    --danger-bg:#501313; --danger:#f7c1c1;
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg3);color:var(--text);min-height:100vh;}
+
+.app-header{background:var(--bg);border-bottom:1px solid var(--border);padding:12px 14px 10px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10;}
+.app-icon{width:36px;height:36px;border-radius:50%;background:#e1f5ee;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.app-title{font-size:16px;font-weight:700;}
+.app-sub{font-size:11px;color:var(--text2);margin-top:1px;}
+.header-actions{margin-left:auto;display:flex;gap:6px;}
+.hdr-btn{padding:6px 13px;font-size:12px;font-weight:600;border-radius:20px;border:none;cursor:pointer;font-family:inherit;}
+.hdr-save{background:#0f6e56;color:#fff;}
+.hdr-reset{background:var(--bg2);color:var(--text2);border:1px solid var(--border2);}
+
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);background:var(--bg);border-bottom:1px solid var(--border);position:sticky;top:59px;z-index:9;}
+.tab{padding:10px 4px;font-size:12px;border:none;background:none;color:var(--text2);cursor:pointer;text-align:center;line-height:1.3;border-bottom:2px solid transparent;font-family:inherit;}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:700;}
+
+.stock-bar{background:var(--bg);border-bottom:1px solid var(--border);position:sticky;top:100px;z-index:8;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.stock-bar::-webkit-scrollbar{display:none;}
+.stock-bar-inner{display:flex;align-items:stretch;min-width:max-content;padding:0 4px;}
+.sb-item{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:5px 10px;gap:2px;border-right:1px solid var(--border);min-width:52px;}
+.sb-item:last-child{border-right:none;}
+.sb-top{display:flex;align-items:center;gap:4px;}
+.sb-dot{width:10px;height:10px;border-radius:50%;border:1px solid rgba(0,0,0,0.15);flex-shrink:0;}
+.sb-dot-bw{width:10px;height:10px;border-radius:50%;border:1px solid rgba(0,0,0,0.15);flex-shrink:0;background:linear-gradient(to right,#378add 50%,#f0f0ec 50%);}
+.sb-label{font-size:10px;color:var(--text2);white-space:nowrap;}
+.sb-count{font-size:16px;font-weight:700;line-height:1;}
+.sb-count.over{color:var(--danger);}
+.sb-count.low{color:#ba7517;}
+
+.panel{display:none;padding:12px 12px 50px;max-width:600px;margin:0 auto;}
+.panel.active{display:block;}
+
+.section{background:var(--bg);border-radius:var(--radius);padding:14px;margin-bottom:12px;border:1px solid var(--border);}
+.section-title{font-size:15px;font-weight:700;margin-bottom:12px;}
+
+.field{margin-bottom:12px;}
+input[type=text],select{width:100%;font-size:16px;padding:10px 12px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--bg);color:var(--text);font-family:inherit;-webkit-appearance:none;appearance:none;}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;}
+
+/* Attendance cards */
+.patrol-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;overflow:hidden;}
+.patrol-header{display:flex;align-items:center;padding:13px 14px;cursor:pointer;user-select:none;gap:10px;}
+.patrol-name{font-size:16px;font-weight:700;flex:1;}
+.patrol-body{border-top:1px solid var(--border);}
+.scout-row{display:flex;align-items:center;padding:9px 14px;gap:10px;border-bottom:1px solid var(--border);}
+.scout-cb{width:24px;height:24px;border-radius:6px;border:2px solid var(--border2);background:var(--bg);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+.scout-cb.checked{background:var(--accent);border-color:var(--accent);}
+.scout-tick{display:none;width:6px;height:11px;border:2px solid #fff;border-top:none;border-left:none;transform:rotate(42deg) translate(0px,-1px);}
+.scout-cb.checked .scout-tick{display:block;}
+.scout-name{flex:1;font-size:15px;}
+
+/* Allocation items */
+.colour-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.colour-btn{display:flex;align-items:center;gap:8px;padding:11px;border-radius:var(--radius-sm);border:1.5px solid var(--border2);background:var(--bg);cursor:pointer;font-size:14px;color:var(--text);}
+.sel-red{border-color:#a32d2d!important;background:#fcebeb!important;color:#a32d2d!important;}
+.sel-blue{border-color:#185fa5!important;background:#e6f1fb!important;color:#0c447c!important;}
+.sel-bluewhite{border-color:#185fa5!important;background:#eff6fc!important;color:#0c447c!important;}
+.sel-orange{border-color:#993c1d!important;background:#faece7!important;color:#712b13!important;}
+.sel-green{border-color:#3b6d11!important;background:#eaf3de!important;color:#27500a!important;}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1a1a18;color:#fff;padding:10px 20px;border-radius:20px;font-size:14px;font-weight:500;z-index:100;transition:transform 0.25s;pointer-events:none;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+.badge{display:inline-block;font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;}
+.b-teal{background:#e1f5ee;color:#085041;} .b-blue{background:#e6f1fb;color:#0c447c;} .b-amber{background:#faeeda;color:#633806;} .b-gray{background:#f1efe8;color:#444441;}
+.dot{width:14px;height:14px;border-radius:50%;display:inline-block;border:1px solid rgba(0,0,0,0.12);vertical-align:middle;}
+.dot-bw{width:14px;height:14px;border-radius:50%;display:inline-block;border:1px solid rgba(0,0,0,0.12);vertical-align:middle;background:linear-gradient(to right,#378add 50%,#f0f0ec 50%);}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="app-icon">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0f6e56" stroke-width="2"><path d="M3 17l2-8h14l2 8H3z"/><path d="M12 9V5"/><path d="M8 17v2"/><path d="M16 17v2"/></svg>
+  </div>
+  <div><div class="app-title">Scout Water Planner</div><div class="app-sub">Live Multi-Device Sync</div></div>
+  <div class="header-actions">
+    <button class="hdr-btn hdr-reset" onclick="confirmReset()">Reset</button>
+    <button class="hdr-btn hdr-save" onclick="saveData()">Sync</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showPanel('attendance',this)">Attendance</button>
+  <button class="tab" onclick="showPanel('allocation',this)">Allocation</button>
+  <button class="tab" onclick="showPanel('adults',this)">Adults</button>
+  <button class="tab" onclick="showPanel('summary',this)">Summary</button>
+</div>
+
+<div class="stock-bar"><div class="stock-bar-inner" id="stock-bar-inner"></div></div>
+
+<div class="panel active" id="panel-attendance"><div id="patrol-container"></div></div>
+<div class="panel" id="panel-allocation"><div id="group-alloc-container"></div></div>
+<div class="panel" id="panel-adults"><div id="leaders-list"></div><button class="add-btn" onclick="addPerson('leaders')">＋ Add leader</button></div>
+<div class="panel" id="panel-summary"><div id="summary-overview"></div></div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  // --- CONFIGURATION ---
+  const firebaseConfig = {
+    apiKey: "AIzaSyDnrrhSFsbzPUqtm4d_rHxz7-goQ_PMsQI", 
+    authDomain: "scout-water-planner-2026.firebaseapp.com",
+    projectId: "scout-water-planner-2026",
+    storageBucket: "scout-water-planner-2026.appspot.com",
+    messagingSenderId: "1062325372337",
+    appId: "1:1062325372337:web:86a117b9b168925208f060"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const docRef = doc(db, "sessions", "live_data");
+
+  // Global variables to hold app state
+  window.scouts = {};
+  window.alloc = {ensigns:{craft:'',sitonCount:0,sitinSelections:{}},lieutenants:{craft:'',sitonCount:0,sitinSelections:{}},commanders:{craft:'',sitonCount:0,sitinSelections:{}}};
+  window.people = {leaders:[],helpers:[]};
+
+  // --- LIVE SYNC LISTENER ---
+  onSnapshot(docRef, (docSnap) => {
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      window.scouts = data.scouts || {};
+      window.alloc = data.alloc || window.alloc;
+      window.people = data.people || window.people;
+      renderAll(); 
+    }
+  });
+
+  // --- SAVE TO CLOUD ---
+  window.saveData = async function() {
+    try {
+      await setDoc(docRef, { scouts: window.scouts, alloc: window.alloc, people: window.people, time: Date.now() });
+      toast('Synced to Cloud ✓');
+    } catch (e) {
+      toast('Sync Failed');
+      console.error(e);
+    }
+  };
+
+  // --- LOGIC FROM ORIGINAL FILE ---
+  // (All the render functions go here)
+  function renderAll() {
+    // This will trigger your original UI drawing functions
+    console.log("Updating UI across all devices...");
+  }
+</script>
+
+</body>
+</html>
