@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Scout Boats">
-<link rel="manifest" href="/manifest.json">
+<link rel="manifest" href="/manifest-offline.json">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <meta name="theme-color" content="#0f6e56">
 <meta name="mobile-web-app-capable" content="yes">
@@ -121,7 +121,7 @@ input:focus,select:focus{outline:none;border-color:var(--accent);}
 .mixed-indent{border-left:3px solid var(--accent);padding-left:14px;margin-top:12px;}
 .mixed-indent-label{font-size:13px;color:var(--text2);margin-bottom:10px;}
 .colour-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
-.colour-btn{display:flex;align-items:center;gap:8px;padding:11px;border-radius:var(--radius-sm);border:1.5px solid var(--border2);background:var(--bg);cursor:pointer;font-size:14px;color:var(--text);user-select:none;touch-action:manipulation;-webkit-tap-highlight-color:rgba(0,0,0,0.1);}
+.colour-btn{display:flex;align-items:center;gap:8px;padding:11px;border-radius:var(--radius-sm);border:1.5px solid var(--border2);background:var(--bg);cursor:pointer;font-size:14px;color:var(--text);user-select:none;}
 .colour-btn .c-stock{font-size:11px;color:var(--text3);margin-left:auto;}
 .sel-red{border-color:#a32d2d!important;background:#fcebeb!important;color:#a32d2d!important;}
 .sel-blue{border-color:#185fa5!important;background:#e6f1fb!important;color:#0c447c!important;}
@@ -134,7 +134,7 @@ input:focus,select:focus{outline:none;border-color:var(--accent);}
 .colour-qty-item .cq-label{flex:1;font-size:14px;display:flex;align-items:center;gap:7px;}
 .colour-qty-item .cq-stock{font-size:11px;color:var(--text3);white-space:nowrap;}
 .stepper-sm{display:flex;align-items:center;border:1px solid var(--border2);border-radius:var(--radius-sm);overflow:hidden;background:var(--bg);}
-.stepper-sm button{width:40px;height:40px;border:none;background:none;font-size:22px;cursor:pointer;color:var(--text);display:flex;align-items:center;justify-content:center;touch-action:manipulation;-webkit-tap-highlight-color:rgba(0,0,0,0.1);}
+.stepper-sm button{width:40px;height:40px;border:none;background:none;font-size:22px;cursor:pointer;color:var(--text);display:flex;align-items:center;justify-content:center;}
 .stepper-sm button:active{background:var(--bg3);}
 .stepper-sm span{min-width:36px;text-align:center;font-size:16px;font-weight:600;}
 .status-bar{display:flex;align-items:center;gap:8px;font-size:13px;padding:10px 12px;border-radius:var(--radius-sm);margin-top:10px;}
@@ -181,37 +181,15 @@ input:focus,select:focus{outline:none;border-color:var(--accent);}
 </head>
 <body>
 
-<!-- SETUP SCREEN -->
-<div id="setup-screen" style="position:fixed;inset:0;background:var(--bg3);z-index:200;display:flex;align-items:center;justify-content:center;padding:24px;">
-  <div style="background:var(--bg);border-radius:16px;padding:28px 24px;max-width:420px;width:100%;border:1px solid var(--border);">
-    <div style="width:52px;height:52px;border-radius:50%;background:#e1f5ee;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0f6e56" stroke-width="2"><path d="M3 17l2-8h14l2 8H3z"/><path d="M12 9V5"/><path d="M8 17v2"/><path d="M16 17v2"/></svg>
-    </div>
-    <div style="font-size:20px;font-weight:700;text-align:center;margin-bottom:6px;">Scout Water Planner</div>
-    <div style="font-size:14px;color:var(--text2);text-align:center;margin-bottom:24px;line-height:1.5;">Enter your Firebase database URL to enable live sync across all devices.</div>
-    <span style="font-size:13px;font-weight:600;margin-bottom:6px;display:block;">Firebase Database URL</span>
-    <input id="fb-url-input" type="text" placeholder="https://your-project-default-rtdb.firebasedatabase.app" autocomplete="off" autocorrect="off" spellcheck="false" style="margin-bottom:10px;">
-    <button onclick="connectFirebase()" style="width:100%;padding:14px;background:#0f6e56;color:#fff;border:none;border-radius:var(--radius-sm);font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;">Connect &amp; Open Planner</button>
-    <div id="setup-err" style="background:var(--danger-bg);color:var(--danger);border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;margin-top:8px;display:none;"></div>
-    <div style="font-size:12px;color:var(--text3);text-align:center;margin-top:14px;line-height:1.6;">Once connected, the URL is saved on this device — you won't need to enter it again.</div>
-    <div id="setup-current-url" style="font-size:12px;color:var(--text3);text-align:center;margin-top:8px;display:none;">Current URL: <span id="setup-url-display" style="word-break:break-all;"></span></div>
-  </div>
-</div>
-
-<!-- MAIN APP -->
-<div id="app" style="display:none">
-
 <div class="app-header">
   <div class="app-icon">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0f6e56" stroke-width="2"><path d="M3 17l2-8h14l2 8H3z"/><path d="M12 9V5"/><path d="M8 17v2"/><path d="M16 17v2"/></svg>
   </div>
-  <div><div class="app-title">Scout Water Planner</div><div class="app-sub">Live sync</div></div>
-  <div id="sync-pill" style="margin-left:auto;display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;background:#faeeda;color:#633806;">
-    <div id="sync-dot" style="width:7px;height:7px;border-radius:50%;background:#ba7517;flex-shrink:0;"></div>
-    <span id="sync-label">Connecting…</span>
+  <div><div class="app-title">Scout Water Planner</div><div class="app-sub">Offline — saves locally</div></div>
+  <div class="header-actions">
+    <button class="hdr-btn hdr-reset" onclick="confirmReset()">Reset</button>
+    <button class="hdr-btn hdr-save" onclick="saveData()">Save</button>
   </div>
-  <button class="hdr-btn hdr-reset" style="margin-left:8px;" onclick="confirmReset()">Reset</button>
-  <button class="hdr-btn hdr-reset" style="margin-left:4px;" onclick="showSetup()">⚙</button>
 </div>
 
 <div class="tabs">
@@ -255,7 +233,6 @@ input:focus,select:focus{outline:none;border-color:var(--accent);}
   <div class="section"><div class="section-title">Adults on water</div><div id="adults-summary"></div></div>
 </div>
 
-</div><!-- /app -->
 <div class="toast" id="toast"></div>
 
 <script>
@@ -308,224 +285,34 @@ let alloc    = {
   commanders: {craft:'',sitonCount:0,craftCount:0,sitinSelections:{}}
 };
 let people = {leaders:[],helpers:[]};
-const FB_URL_KEY = 'scout_fb_url';
-let fbDb = null;
+const SAVE_KEY = 'scout_water_offline_v1';
 
-// ── Firebase setup ────────────────────────────────────────────────────────────
-function connectFirebase() {
-  const raw = document.getElementById('fb-url-input').value.trim().replace(/\/$/, '');
-  const errEl = document.getElementById('setup-err');
-  errEl.style.display = 'none';
-  if (!raw || !raw.startsWith('https://')) {
-    errEl.textContent = 'Please enter a valid Firebase URL starting with https://';
-    errEl.style.display = 'block';
-    return;
-  }
-  localStorage.setItem(FB_URL_KEY, raw);
-  launchApp(raw);
-}
-
-function launchApp(dbUrl) {
-  document.getElementById('setup-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-  fbDb = dbUrl;
-  syncRoster();
-  renderAll();
-  initAllocDelegation();
-  startStream();
-}
-
-// ── Firebase helpers ──────────────────────────────────────────────────────────
-function fbPath(path) { return `${fbDb}/${path}.json`; }
-
-async function fbSet(path, data) {
+// ── Persistence — localStorage ────────────────────────────────────────────────
+function saveData() {
   try {
-    const r = await fetch(fbPath(path), {
-      method: 'PUT',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(data)
-    });
-    return r.ok;
-  } catch(e) { setSyncStatus('offline'); return false; }
+    localStorage.setItem(SAVE_KEY, JSON.stringify({scouts,expanded,alloc,people}));
+    toast('Saved ✓');
+  } catch(e) { toast('Save failed'); }
 }
 
-// ── Firebase SSE streaming — instant updates, no polling lag ─────────────────
-// SSE works in Chrome on Android from file://, though not in iOS Safari.
-// We use SSE as primary, fall back to 3s polling if SSE fails.
-let evtSource    = null;
-let pushTimer    = null;
-let isPushing    = false;
-let sseOk        = false;
-let pollTimer    = null;
-let lastHash     = '';
-let lastWriteTime = 0;   // timestamp of last confirmed Firebase write
-
-function hashOf(x) { try { return JSON.stringify(x); } catch(e) { return ''; } }
-
-function startStream() {
-  stopStream();
+function loadData() {
   try {
-    evtSource = new EventSource(`${fbDb}/session.json`);
-    evtSource.addEventListener('put', onSseEvent);
-    evtSource.addEventListener('patch', onSseEvent);
-    evtSource.onopen = () => {
-      sseOk = true;
-      setSyncStatus('live');
-      stopPolling();
-    };
-    evtSource.onerror = () => {
-      setSyncStatus('offline');
-      if (!sseOk) {
-        stopStream();
-        startPolling();
-      }
-    };
-  } catch(e) {
-    startPolling();
-  }
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return;
+    const d = JSON.parse(raw);
+    if (d.scouts)   scouts   = d.scouts;
+    if (d.expanded) expanded = d.expanded;
+    if (d.alloc)    alloc    = d.alloc;
+    if (d.people)   people   = d.people;
+  } catch(e) {}
 }
 
-// ── Wake-up on visibility change ──────────────────────────────────────────────
-// Android Chrome kills SSE connections when the screen locks or app is backgrounded.
-// When the user returns, we detect this, force a fresh fetch from Firebase,
-// re-render everything from the latest state, then reconnect the stream.
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState !== 'visible') return;
-  if (!fbDb) return;
-  // Force a fresh fetch regardless of cached hash
-  lastHash = '';
-  // If SSE died while backgrounded, restart it
-  if (!evtSource || evtSource.readyState === EventSource.CLOSED) {
-    sseOk = false;
-    startStream();
-  }
-  // Always do an immediate poll to get latest state right now
-  wakeAndSync();
-});
-
-async function wakeAndSync() {
-  // Reset any stuck push state from before the app was backgrounded
-  isPushing = false;
-  pushTimer = null;
-  setSyncStatus('offline');
-  try {
-    const r = await fetch(fbPath('session') + '?ts=' + Date.now()); // cache-bust
-    if (!r.ok) { setSyncStatus('offline'); return; }
-    const data = await r.json();
-    setSyncStatus('live');
-    if (data && typeof data === 'object') {
-      applyRemote(data);
-    } else {
-      syncRoster();
-      renderAll();
-    }
-  } catch(e) { setSyncStatus('offline'); }
-}
-
-function stopStream() {
-  if (evtSource) { evtSource.close(); evtSource = null; }
-  sseOk = false;
-}
-
-function onSseEvent(e) {
-  setSyncStatus('live');
-  try {
-    const payload = JSON.parse(e.data);
-    const data = payload.data;
-    if (!data) { syncRoster(); renderAll(); return; }
-    // Skip only if this is an echo of our own last write
-    const h = hashOf(data);
-    if (isPushing && h === lastHash) return;
-    lastHash = h;
-    applyRemote(data);
-  } catch(err) {}
-}
-
-// Polling fallback for file:// on iOS / old browsers
-function startPolling() {
-  if (pollTimer) return;
-  pollOnce();
-  pollTimer = setInterval(pollOnce, 3000);
-}
-
-function stopPolling() {
-  if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
-}
-
-async function pollOnce() {
-  if (isPushing) return;
-  try {
-    const r = await fetch(fbPath('session'));
-    if (!r.ok) { setSyncStatus('offline'); return; }
-    const data = await r.json();
-    setSyncStatus('live');
-    const h = hashOf(data);
-    if (h === lastHash) return;
-    lastHash = h;
-    if (data && typeof data === 'object') applyRemote(data);
-    else { syncRoster(); renderAll(); }
-  } catch(e) { setSyncStatus('offline'); }
-}
-
-function applyRemote(data) {
-  const has = k => Object.prototype.hasOwnProperty.call(data, k);
-  // Block overwriting local state while a write is pending, in flight,
-  // OR for a grace period after the write completes (lastWriteTime).
-  const msSinceWrite = Date.now() - lastWriteTime;
-  const protected_ = isPushing || pushTimer !== null || msSinceWrite < 1500;
-  if (!protected_) {
-    if (has('scouts'))   scouts   = data.scouts;
-    if (has('expanded')) expanded = data.expanded;
-    if (has('alloc'))    alloc    = data.alloc;
-    if (has('people'))   people   = data.people;
-  } else {
-    // Always safe to sync expanded (just UI panel state, no craft data)
-    if (has('expanded')) expanded = data.expanded;
-  }
-  if (!people || !people.leaders) people = {leaders:[], helpers:[]};
-  if (!people.helpers) people.helpers = [];
-  syncRoster();
-  renderAll();
-}
-
-function pushState() {
-  clearTimeout(pushTimer);
-  // Keep pushTimer non-null while waiting, so applyRemote knows we're editing
-  pushTimer = setTimeout(async () => {
-    isPushing = true;
-    pushTimer = null;  // debounce wait is over, now pushing
-    const payload = { scouts, expanded, alloc, people };
-    const ok = await fbSet('session', payload);
-    if (ok) {
-      lastHash = hashOf(payload);
-      lastWriteTime = Date.now();
-      setSyncStatus('live');
-    }
-    setTimeout(() => { isPushing = false; }, 800);
-  }, 300);
-}
-
-function setSyncStatus(state) {
-  const pill  = document.getElementById('sync-pill');
-  const dot   = document.getElementById('sync-dot');
-  const label = document.getElementById('sync-label');
-  if (state === 'live') {
-    pill.style.background  = '#e1f5ee'; pill.style.color = '#085041';
-    dot.style.background   = '#0f6e56';
-    label.textContent      = 'Live';
-  } else {
-    pill.style.background  = '#faeeda'; pill.style.color = '#633806';
-    dot.style.background   = '#ba7517';
-    label.textContent      = 'Offline';
-  }
-}
-
-// ── Persistence (replaced by Firebase — kept as no-ops for safety) ────────────
-function saveData() { pushState(); toast('Saved ✓'); }
-function loadData() {}  // data comes from Firebase now
+// pushState is a no-op in offline mode — user saves manually
+function pushState() {}
 
 function confirmReset() {
-  if (!confirm('Reset all attendance, allocations and adults for everyone? This cannot be undone.')) return;
+  if (!confirm('Reset all attendance, allocations and adults? This cannot be undone.')) return;
+  localStorage.removeItem(SAVE_KEY);
   scouts = {};
   expanded = {Victory:true,Endeavour:true,Discovery:true};
   alloc = {
@@ -535,7 +322,6 @@ function confirmReset() {
   };
   people = {leaders:[],helpers:[]};
   syncRoster();
-  pushState();
   renderAll();
   toast('Reset complete');
 }
@@ -597,18 +383,6 @@ function renderPatrols() {
     const grp = scouts[key].group;
     if (!grouped[patrol][grp]) grouped[patrol][grp] = [];
     grouped[patrol][grp].push(key);
-  });
-  // Sort each group alphabetically by first name
-  PATROL_ORDER.forEach(p => {
-    GROUPS.forEach(g => {
-      if (grouped[p][g.id]) {
-        grouped[p][g.id].sort((a, b) => {
-          const nameA = a.split('|')[2].toLowerCase();
-          const nameB = b.split('|')[2].toLowerCase();
-          return nameA.localeCompare(nameB);
-        });
-      }
-    });
   });
 
   const html = PATROL_ORDER.map(patrol => {
@@ -687,35 +461,42 @@ function dotHtml(c) {
 function sitinSum(gid) { return Object.values(alloc[gid].sitinSelections).reduce((s,v)=>s+v,0); }
 
 function setCraft(gid,val) {
-  // Always fully reset all craft fields when changing type
-  // to ensure no stale colour pickers or counts remain
-  alloc[gid].craft = val;
-  alloc[gid].craftCount = 0;
-  alloc[gid].sitonCount = 0;
-  alloc[gid].sitinSelections = {};
+  alloc[gid].craft=val;
+  alloc[gid].craftCount=0;
+  if(val!=='mixed'&&val!=='sitin') alloc[gid].sitinSelections={};
+  if(val!=='mixed') alloc[gid].sitonCount=0;
   pushState(); renderGroupAlloc(); calc();
 }
 function stepCount(gid,delta) {
   const craft = alloc[gid].craft;
+  const counts = attendedCounts();
   const cu = buildCraftUsed();
   const cur = alloc[gid].craftCount||0;
-  let avail;
-  if (craft==='sup')        avail = Math.max(0, STOCK.sup   - (cu.sup   - cur));
-  else if (craft==='siton') avail = Math.max(0, STOCK.siton - (cu.siton - cur));
-  else                      avail = Math.max(0, STOCK.canoe - (cu.canoe - cur));
-  // Cap against stock only — not attending count, so pre-session setup works
-  alloc[gid].craftCount = Math.max(0, Math.min(avail, cur + delta));
+  let avail, max;
+  if (craft==='sup') {
+    avail = Math.max(0, STOCK.sup - (cu.sup - cur));
+    max = Math.min(counts[gid]||0, avail);
+  } else if (craft==='siton') {
+    avail = Math.max(0, STOCK.siton - (cu.siton - cur));
+    max = Math.min(counts[gid]||0, avail);
+  } else { // canoe
+    avail = Math.max(0, STOCK.canoe - (cu.canoe - cur));
+    max = avail;
+  }
+  alloc[gid].craftCount = Math.max(0, Math.min(max, cur + delta));
   const el = document.getElementById('craft-count-v-'+gid);
   if(el) el.textContent = alloc[gid].craftCount;
   pushState(); renderGroupAlloc(); calc();
 }
 function stepSiton(gid,delta) {
+  const counts=attendedCounts();
   const cu=buildCraftUsed();
   const cur=alloc[gid].sitonCount||0;
-  const avail=Math.max(0,STOCK.siton - (cu.siton - cur));
-  alloc[gid].sitonCount=Math.max(0,Math.min(avail,cur+delta));
-  const el=document.getElementById('siton-v-'+gid);
-  if(el) el.textContent=alloc[gid].sitonCount;
+  const usedByOthers=cu.siton - cur; // siton used by all other groups + adults
+  const availSiton=Math.max(0,STOCK.siton - usedByOthers);
+  const max=Math.min(counts[gid]||0, availSiton);
+  alloc[gid].sitonCount=Math.max(0,Math.min(max,cur+delta));
+  document.getElementById('siton-v-'+gid).textContent=alloc[gid].sitonCount;
   pushState(); renderGroupAlloc(); calc();
 }
 function toggleColour(gid,key) {
@@ -771,37 +552,32 @@ function sitinPickerHtml(gid, count, isMixed, alreadyUsed) {
 }
 
 function craftCountStepperHtml(gid, count, stock, label, usedByOthers) {
+  // usedByOthers = how many of this craft type other groups + adults have taken
   const a = alloc[gid];
   const cur = a.craftCount || 0;
-  const avail = Math.max(0, stock - usedByOthers);
-  const overStock = cur > avail;
+  const avail = Math.max(0, stock - usedByOthers); // remaining after others
+  const max = label==='Canoe' ? avail : Math.min(count, avail);
+  const over = cur > avail;
   const isCanoe = label === 'Canoe';
-  // Warning: over stock cap
-  let status;
-  if (cur === 0) {
-    status = `<div class="status-bar status-warn">⚠ Set how many ${label}s needed</div>`;
-  } else if (overStock) {
-    status = `<div class="status-bar status-warn">⚠ Only ${avail} ${label}${avail!==1?'s':''} left (others using ${usedByOthers})</div>`;
-  } else if (isCanoe) {
-    status = `<div class="status-bar status-ok">✓ ${cur} canoe${cur!==1?'s':''} — up to ${cur*3} scouts</div>`;
-  } else if (count === 0) {
-    // No one marked attending yet — just confirm what's been set
-    status = `<div class="status-bar status-ok">✓ ${cur} ${label}${cur!==1?'s':''} pre-selected</div>`;
-  } else if (cur < count) {
-    status = `<div class="status-bar status-warn">⚠ ${cur} of ${count} scouts allocated</div>`;
-  } else if (cur > count) {
-    status = `<div class="status-bar status-warn">⚠ ${cur} selected, only ${count} attending</div>`;
-  } else {
-    status = `<div class="status-bar status-ok">✓ All ${count} scouts allocated</div>`;
-  }
+  const status = count > 0 || isCanoe
+    ? (cur === 0
+        ? `<div class="status-bar status-warn">⚠ Set how many ${label}s needed</div>`
+        : over
+          ? `<div class="status-bar status-warn" style="color:var(--danger)">⚠ Only ${avail} ${label}${avail!==1?'s':''} left (others using ${usedByOthers})</div>`
+          : isCanoe
+            ? `<div class="status-bar status-ok">✓ ${cur} canoe${cur!==1?'s':''} — up to ${cur*3} scouts</div>`
+            : cur < count
+              ? `<div class="status-bar status-warn">⚠ ${cur} of ${count} scouts allocated</div>`
+              : `<div class="status-bar status-ok">✓ All ${count} scouts allocated</div>`)
+    : '';
   return `<div class="colour-qty-item" style="margin-bottom:0;">
     <span class="cq-label" style="font-size:15px;">${label}s needed</span>
     <div class="stepper-sm">
       <button type="button" data-action="craftcount" data-gid="${gid}" data-delta="-1">−</button>
-      <span id="craft-count-v-${gid}" style="${overStock?'color:var(--danger);font-weight:700':''}">${cur}</span>
+      <span id="craft-count-v-${gid}" style="${over?'color:var(--danger);font-weight:700':''}">${cur}</span>
       <button type="button" data-action="craftcount" data-gid="${gid}" data-delta="1">+</button>
     </div>
-    <span class="cq-stock" style="${overStock?'color:var(--danger);font-weight:600':''}">${avail} left</span>
+    <span class="cq-stock" style="${over?'color:var(--danger);font-weight:600':''}">${avail} left</span>
   </div>${status}`;
 }
 
@@ -815,8 +591,7 @@ function buildSitinUsed() {
       used[col] = (used[col]||0) + qty;
     });
   });
-  const sitinPeople = (people.leaders||[]).concat(people.helpers||[]);
-  sitinPeople.forEach(p => {
+  people.leaders.concat(people.helpers).forEach(p => {
     if (p.craft==='sitin' && p.sitinColour) {
       used[p.sitinColour] = (used[p.sitinColour]||0) + 1;
     }
@@ -835,8 +610,7 @@ function buildCraftUsed() {
     if (a.craft==='canoe') used.canoe += (a.craftCount||0);
     if (a.craft==='mixed') used.siton += (a.sitonCount||0);
   });
-  const allPeople = (people.leaders||[]).concat(people.helpers||[]);
-  allPeople.forEach(p => {
+  people.leaders.concat(people.helpers).forEach(p => {
     if (p.craft==='sup')   used.sup++;
     if (p.craft==='siton') used.siton++;
     if (p.craft==='canoe') used.canoe++;
@@ -868,14 +642,13 @@ function renderGroupAlloc() {
       const canoeOthers = craftUsed.canoe - numCanoes;
       const canoeAvail = Math.max(0, STOCK.canoe - canoeOthers);
       const over = numCanoes > canoeAvail;
-      let status;
-      if (numCanoes === 0) {
-        status = `<div class="status-bar status-warn">⚠ Set how many canoes you need</div>`;
-      } else if (over) {
-        status = `<div class="status-bar status-warn">⚠ Only ${canoeAvail} canoe${canoeAvail!==1?'s':''} left (others using ${canoeOthers})</div>`;
-      } else {
-        status = `<div class="status-bar status-ok">✓ ${numCanoes} canoe${numCanoes!==1?'s':''} — up to ${numCanoes*3} scouts</div>`;
-      }
+      const status = count > 0
+        ? (numCanoes === 0
+            ? `<div class="status-bar status-warn">⚠ Set how many canoes you need</div>`
+            : over
+              ? `<div class="status-bar status-warn">⚠ Only ${canoeAvail} canoe${canoeAvail!==1?'s':''} left (others using ${canoeOthers})</div>`
+              : `<div class="status-bar status-ok">✓ ${numCanoes} canoe${numCanoes!==1?'s':''} — up to ${numCanoes*3} scouts</div>`)
+        : '';
       extra = `<div class="mixed-indent">
         <div class="colour-qty-item" style="margin-bottom:0;">
           <span class="cq-label" style="font-size:15px;">Canoes needed</span>
@@ -891,18 +664,15 @@ function renderGroupAlloc() {
       // Sit-in: colour picker with total capped at attending count
       const needed = count;
       const overTotal = sitinTotal > count;
-      let sitinStatus;
-      if (sitinTotal === 0) {
-        sitinStatus = `<div class="status-bar status-warn">⚠ Select colours and quantities</div>`;
-      } else if (overTotal) {
-        sitinStatus = `<div class="status-bar status-warn">⚠ ${sitinTotal} selected but only ${count} attending</div>`;
-      } else if (count === 0) {
-        sitinStatus = `<div class="status-bar status-ok">✓ ${sitinTotal} sit-in${sitinTotal!==1?'s':''} pre-selected</div>`;
-      } else if (sitinTotal < count) {
-        sitinStatus = `<div class="status-bar status-warn">⚠ ${sitinTotal} of ${count} sit-ins assigned</div>`;
-      } else {
-        sitinStatus = `<div class="status-bar status-ok">✓ All ${count} sit-ins assigned</div>`;
-      }
+      const sitinStatus = count > 0
+        ? (sitinTotal === 0
+            ? `<div class="status-bar status-warn">⚠ Select colours and quantities</div>`
+            : overTotal
+              ? `<div class="status-bar status-warn">⚠ ${sitinTotal} selected but only ${count} attending</div>`
+              : sitinTotal < count
+                ? `<div class="status-bar status-warn">⚠ ${sitinTotal} of ${count} sit-ins assigned</div>`
+                : `<div class="status-bar status-ok">✓ All ${count} sit-ins assigned</div>`)
+        : '';
       // alreadyUsed = total used by everyone EXCEPT this group
       const usedByOthers_s = {};
       SITIN_COLOURS.forEach(col => {
@@ -913,18 +683,15 @@ function renderGroupAlloc() {
       extra = `<div class="mixed-indent">${sitinPickerHtml(g.id, count, false, usedByOthers_s)}${sitinStatus}</div>`;
     } else if (craft === 'mixed') {
       const overMixed = mixedTotal > count;
-      let mixedStatus;
-      if (mixedTotal === 0) {
-        mixedStatus = `<div class="status-bar status-warn">⚠ Allocate sit on tops and/or sit-ins</div>`;
-      } else if (overMixed) {
-        mixedStatus = `<div class="status-bar status-warn">⚠ ${mixedTotal} allocated but only ${count} attending</div>`;
-      } else if (count === 0) {
-        mixedStatus = `<div class="status-bar status-ok">✓ ${mixedTotal} pre-selected</div>`;
-      } else if (mixedTotal < count) {
-        mixedStatus = `<div class="status-bar status-warn">⚠ ${mixedTotal} of ${count} scouts allocated</div>`;
-      } else {
-        mixedStatus = `<div class="status-bar status-ok">✓ All ${count} scouts allocated</div>`;
-      }
+      const mixedStatus = count > 0
+        ? (mixedTotal === 0
+            ? `<div class="status-bar status-warn">⚠ Allocate sit on tops and/or sit-ins</div>`
+            : overMixed
+              ? `<div class="status-bar status-warn">⚠ ${mixedTotal} allocated but only ${count} attending</div>`
+              : mixedTotal < count
+                ? `<div class="status-bar status-warn">⚠ ${mixedTotal} of ${count} scouts allocated</div>`
+                : `<div class="status-bar status-ok">✓ All ${count} scouts allocated</div>`)
+        : '';
       extra = `<div class="mixed-indent">
         <div class="mixed-indent-label">Sit on tops for this group:</div>
         <div class="colour-qty-item" style="margin-bottom:14px;">
@@ -934,7 +701,7 @@ function renderGroupAlloc() {
             <span id="siton-v-${g.id}">${a.sitonCount}</span>
             <button type="button" data-action="siton" data-gid="${g.id}" data-delta="1">+</button>
           </div>
-          <span class="cq-stock" style="${(a.sitonCount||0) > Math.max(0,STOCK.siton-(craftUsed.siton-(a.sitonCount||0)))?'color:var(--danger);font-weight:600':''}">${Math.max(0,STOCK.siton-(craftUsed.siton-(a.sitonCount||0)))} left of ${STOCK.siton}</span>
+          <span class="cq-stock" style="${(a.sitonCount||0) > Math.max(0,STOCK.siton-(craftUsed.siton-(a.sitonCount||0)))?'color:var(--danger);font-weight:600':''}">${Math.max(0,STOCK.siton-(craftUsed.siton-(a.sitonCount||0)))} left</span>
         </div>
         ${(() => {
           const usedByOthers_m = {};
@@ -972,51 +739,26 @@ function renderGroupAlloc() {
 function initAllocDelegation() {
   const container = document.getElementById('panel-allocation');
   if (!container) return;
-
-  let lastTouchTarget = null;
-  let lastTouchTime = 0;
-
-  function dispatchAction(el) {
-    if (!el || !el.dataset || !el.dataset.action) return false;
-    const {action, gid, key, delta} = el.dataset;
-    if (action === 'togglecolour')    toggleColour(gid, key);
-    else if (action === 'sitinqty')   stepSitinQty(gid, key, parseInt(delta));
-    else if (action === 'siton')      stepSiton(gid, parseInt(delta));
-    else if (action === 'craftcount') stepCount(gid, parseInt(delta));
-    else return false;
-    return true;
-  }
-
-  function findAction(target) {
-    let el = target;
+  function handle(e) {
+    // Walk up to find a button with data-action
+    let el = e.target;
     while (el && el !== container) {
-      if (el.dataset && el.dataset.action) return el;
+      if (el.dataset && el.dataset.action) break;
       el = el.parentElement;
     }
-    return null;
+    if (!el || !el.dataset.action) return;
+    e.preventDefault();
+    const {action, gid, key, delta} = el.dataset;
+    if (action === 'togglecolour') toggleColour(gid, key);
+    else if (action === 'sitinqty')  stepSitinQty(gid, key, parseInt(delta));
+    else if (action === 'siton')     stepSiton(gid, parseInt(delta));
+    else if (action === 'craftcount') stepCount(gid, parseInt(delta));
   }
-
-  // touchstart for instant response on Android
-  container.addEventListener('touchstart', function(e) {
-    const el = findAction(e.target);
-    if (!el) return;
-    lastTouchTarget = el;
-    lastTouchTime = Date.now();
-    e.preventDefault(); // prevent scroll & 300ms click delay
-    dispatchAction(el);
-  }, {passive: false});
-
-  // click fallback for mouse/desktop
-  container.addEventListener('click', function(e) {
-    const el = findAction(e.target);
-    if (!el) return;
-    // Skip if touchstart already handled this within 500ms
-    if (el === lastTouchTarget && Date.now() - lastTouchTime < 500) return;
-    dispatchAction(el);
-  });
+  container.addEventListener('touchend', handle, {passive:false});
+  container.addEventListener('click',    handle);
 }
-function addPerson(g) { people[g].push({name:'',craft:'',sitinColour:''}); pushState(); renderPeople(); renderGroupAlloc(); calc(); }
-function removePerson(g,i) { people[g].splice(i,1); pushState(); renderPeople(); renderGroupAlloc(); calc(); }
+function addPerson(g) { people[g].push({name:'',craft:'',sitinColour:''}); pushState(); renderPeople(); calc(); }
+function removePerson(g,i) { people[g].splice(i,1); pushState(); renderPeople(); calc(); }
 function renderPeople() {
   ['leaders','helpers'].forEach(g=>{
     const el=document.getElementById(g+'-list');
@@ -1027,7 +769,7 @@ function renderPeople() {
         <div class="field"><span class="field-label">Name</span><input type="text" placeholder="Name" value="${p.name}" oninput="people['${g}'][${i}].name=this.value;pushState();calc()"></div>
         <div class="field" style="margin-bottom:${p.craft==='sitin'?'12px':'0'}">
           <span class="field-label">Boat type</span>
-          <select onchange="people['${g}'][${i}].craft=this.value;people['${g}'][${i}].sitinColour='';pushState();renderPeople();renderGroupAlloc();calc()">
+          <select onchange="people['${g}'][${i}].craft=this.value;people['${g}'][${i}].sitinColour='';pushState();renderPeople();calc()">
             <option value="">No boat</option>
             <option value="sup" ${p.craft==='sup'?'selected':''}>SUP</option>
             <option value="siton" ${p.craft==='siton'?'selected':''}>Sit on top</option>
@@ -1037,7 +779,7 @@ function renderPeople() {
           </select>
         </div>
         ${p.craft==='sitin'?`<div class="field" style="margin-bottom:0"><span class="field-label">Kayak colour</span>
-          <select onchange="people['${g}'][${i}].sitinColour=this.value;pushState();renderGroupAlloc();calc()">
+          <select onchange="people['${g}'][${i}].sitinColour=this.value;pushState();calc()">
             <option value="">Select colour</option>
             ${SITIN_COLOURS.map(c=>`<option value="${c.key}" ${p.sitinColour===c.key?'selected':''}>${c.label}</option>`).join('')}
           </select></div>`:''}
@@ -1056,7 +798,7 @@ function getNeeds() {
   GROUPS.forEach(g=>{
     const count=counts[g.id]||0; const a=alloc[g.id];
     perGroup[g.id]={sup:0,siton:0,canoe:0,other:0,sitin:{}};
-    if(!a.craft) return;
+    if(!a.craft||count===0) return;
     if(a.craft==='sup')  {const n=a.craftCount||0;needed.sup+=n;perGroup[g.id].sup=n;}
     else if(a.craft==='siton') {const n=a.craftCount||0;needed.siton+=n;perGroup[g.id].siton=n;}
     else if(a.craft==='canoe') {const b=a.craftCount||0;needed.canoe+=b;perGroup[g.id].canoe=b;}
@@ -1168,21 +910,14 @@ function updateStockBar(){
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
-function renderAll(){
-  renderPatrols();
-  renderGroupAlloc();
-  renderPeople();
-  calc();
-}
+function renderAll(){renderPatrols();renderGroupAlloc();renderPeople();calc();}
 
 
 // Ensure all roster scouts exist in state
 function syncRoster() {
   PATROL_ORDER.forEach(patrol => {
     GROUPS.forEach(g => {
-      // Sort roster alphabetically before syncing
-      const names = [...(ROSTER[patrol][g.id]||[])].sort((a,b) => a.toLowerCase().localeCompare(b.toLowerCase()));
-      names.forEach(name => {
+      (ROSTER[patrol][g.id]||[]).forEach(name => {
         const key = `${patrol}|${g.id}|${name}`;
         if (!scouts[key]) scouts[key] = {attended:false, group:g.id};
       });
@@ -1190,27 +925,11 @@ function syncRoster() {
   });
 }
 
-// Boot — check for saved URL, show setup screen or launch directly
-function showSetup() {
-  stopStream();
-  stopPolling();
-  if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('setup-screen').style.display = 'flex';
-  const saved = localStorage.getItem(FB_URL_KEY);
-  if (saved) {
-    document.getElementById('fb-url-input').value = saved;
-    document.getElementById('setup-current-url').style.display = 'block';
-    document.getElementById('setup-url-display').textContent = saved;
-  }
-}
-
-const savedUrl = localStorage.getItem(FB_URL_KEY);
-if (savedUrl) {
-  launchApp(savedUrl);
-} else {
-  document.getElementById('setup-screen').style.display = 'flex';
-}
+// ── Boot ─────────────────────────────────────────────────────────────────────
+loadData();
+syncRoster();
+renderAll();
+initAllocDelegation();
 </script>
 
 <script>
